@@ -28,29 +28,131 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Light styling -- a calm, real-estate-appropriate palette
+# Styling -- warm brass/clay "real estate ledger" palette on a dark base
+# (paired with .streamlit/config.toml, which sets the native theme colors)
 # ---------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    .metric-card {
-        background-color: #F7F5F0;
-        border: 1px solid #E4DFD3;
-        border-radius: 10px;
-        padding: 1.1rem 1.3rem;
-        margin-bottom: 0.6rem;
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+    html, body, [class^="css"], [class*=" css"] { font-family: 'Inter', sans-serif; }
+
+    [data-testid="stAppViewContainer"] h1,
+    [data-testid="stAppViewContainer"] h2,
+    [data-testid="stAppViewContainer"] h3 {
+        font-family: 'Fraunces', serif;
+        letter-spacing: 0.01em;
     }
-    .price-result {
-        background-color: #EAF3EC;
-        border: 1px solid #B9DAC2;
+    [data-testid="stAppViewContainer"] h1 {
+        border-bottom: 3px solid #B0522A;
+        padding-bottom: 0.45rem;
+        display: inline-block;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #14120D 0%, #1B1811 100%);
+        border-right: 1px solid #3A3226;
+    }
+    section[data-testid="stSidebar"] h1 {
+        font-family: 'Fraunces', serif;
+        color: #C9973E;
+        font-size: 1.4rem;
+        border-bottom: 2px solid #C9973E;
+        padding-bottom: 0.6rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Hero (Home page) */
+    .hero {
+        background: radial-gradient(circle at 85% -10%, rgba(201,151,62,0.16), transparent 55%),
+                    linear-gradient(135deg, #241D14 0%, #17140F 75%);
+        border: 1px solid #3A3226;
+        border-radius: 18px;
+        padding: 2.6rem 3rem;
+        margin-bottom: 1.6rem;
+    }
+    .hero-title {
+        font-family: 'Fraunces', serif;
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #F1EAD9;
+        margin: 0 0 0.6rem 0;
+        line-height: 1.08;
+    }
+    .hero-sub {
+        color: #B8AD98;
+        font-size: 1.08rem;
+        max-width: 640px;
+        margin: 0;
+    }
+    .hero-rule {
+        width: 60px; height: 3px; background: #B0522A; border-radius: 2px;
+        margin: 1.1rem 0 1.2rem 0;
+    }
+
+    /* Info / metric cards */
+    .info-card {
+        background: #201C16;
+        border: 1px solid #3A3226;
+        border-left: 4px solid #C9973E;
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem;
+    }
+    div[data-testid="stMetric"] {
+        background: #201C16;
+        border: 1px solid #3A3226;
         border-radius: 12px;
-        padding: 1.6rem;
+        padding: 0.9rem 1rem 0.6rem 1rem;
+    }
+    div[data-testid="stMetricValue"] { color: #C9973E; }
+    div[data-testid="stMetricLabel"] { color: #B8AD98; }
+
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #B0522A, #8C3D1E);
+        color: #F5EFE6;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 0.65rem 1.3rem;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(176, 82, 42, 0.35);
+        color: #F5EFE6;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid #3A3226; gap: 6px; }
+    .stTabs [data-baseweb="tab"] { color: #B8AD98; font-weight: 500; }
+    .stTabs [aria-selected="true"] {
+        color: #C9973E !important;
+        border-bottom: 2px solid #C9973E !important;
+    }
+
+    /* Prediction result */
+    .price-result {
+        background: linear-gradient(135deg, #22321F, #1B2A18);
+        border: 1px solid #3E5A3A;
+        border-radius: 16px;
+        padding: 2rem;
         text-align: center;
     }
-    .price-result h1 {
-        color: #1B4332;
-        font-size: 2.6rem;
+    .price-result .price-label {
+        color: #9FC79A;
+        font-size: 1.05rem;
+        letter-spacing: 0.01em;
         margin: 0;
+    }
+    .price-result .price-amount {
+        font-family: 'Fraunces', serif;
+        color: #EFF7EC;
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 0.25rem 0 0 0;
     }
     </style>
     """,
@@ -117,10 +219,18 @@ if bundle is None:
 # HOME
 # ---------------------------------------------------------------------------
 if page.endswith("Home"):
-    st.title("Ames Housing Price Prediction")
-    st.write(
-        "This application predicts the **sale price of a house** in Ames, Iowa, "
-        "based on its physical characteristics, quality ratings, and location."
+    st.markdown(
+        """
+        <div class="hero">
+            <p class="hero-title">Ames Housing Price Prediction</p>
+            <div class="hero-rule"></div>
+            <p class="hero-sub">
+                Predicting what a home in Ames, Iowa is worth — from its size and quality
+                to its neighborhood — using a regression model trained on real sale records.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     col1, col2 = st.columns([2, 1])
@@ -140,16 +250,21 @@ learn these relationships directly from thousands of historical sales.
             """
         )
     with col2:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.markdown("**Project Information**")
-        st.write(f"**Problem Type:** Regression")
-        st.write(f"**Dataset:** AmesHousing.csv")
-        st.write(f"**Target:** SalePrice")
         model_name = bundle["model_name"] if bundle else "Not trained yet"
-        st.write(f"**Model:** {model_name}")
-        if bundle:
-            st.write(f"**Test R²:** {bundle['metrics']['test']['r2']:.3f}")
-        st.markdown("</div>", unsafe_allow_html=True)
+        test_r2_line = f"<p style='margin:0.3rem 0;'><b>Test R²:</b> {bundle['metrics']['test']['r2']:.3f}</p>" if bundle else ""
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <p style="margin:0 0 0.6rem 0; font-family:'Fraunces',serif; font-size:1.05rem;">Project Information</p>
+                <p style="margin:0.3rem 0;"><b>Problem Type:</b> Regression</p>
+                <p style="margin:0.3rem 0;"><b>Dataset:</b> AmesHousing.csv</p>
+                <p style="margin:0.3rem 0;"><b>Target:</b> SalePrice</p>
+                <p style="margin:0.3rem 0;"><b>Model:</b> {model_name}</p>
+                {test_r2_line}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if df is None:
         st.error("AmesHousing.csv not found. Place it next to app.py.")
@@ -393,8 +508,8 @@ elif page.endswith("House Price Prediction"):
                 st.markdown(
                     f"""
                     <div class="price-result">
-                        <p style="margin:0; color:#3A5A40; font-size:1.1rem;">Estimated House Price</p>
-                        <h1>${prediction:,.0f}</h1>
+                        <p class="price-label">Estimated House Price</p>
+                        <p class="price-amount">${prediction:,.0f}</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
